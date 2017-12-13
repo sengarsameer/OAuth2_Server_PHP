@@ -1,2 +1,2 @@
 # OAuth_Server_PHP
-Creating a PHP OAuth Sever
+Creating an OAuth2 in PHP
