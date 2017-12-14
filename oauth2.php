@@ -11,14 +11,14 @@
         private $_action;
     }
 
-    function __construct ($APIKey = "", $sharedSecret="") {
+    function __construct ($APIKey = "", $consumerSecret="") {
 
         if (!empty($APIKey)) {
-            $this->_secret['user_key'] = $APIKey;
+            $this->_secret['consumer_key'] = $APIKey;
         }
 
-        if (!empty($sharedSecret)) {
-            $this->_secret['shared_secret'] = $sharedSecret;
+        if (!empty($consumerSecret)) {
+            $this->_secret['consumer_secret'] = $consumerSecret;
         }
 
         $this->_signature = "HMAC-SHA1";
@@ -53,7 +53,7 @@
             $this->_parameter = array_merge($this->_parameter,$parameter);
         }
 
-        if (empty($this->_parameter['oauth2_user_key'])) {
+        if (empty($this->_parameter['oauth2_consumer_key'])) {
             $this->_getApiKey();
         }
 
@@ -125,22 +125,53 @@
         }
 
         if (isset($this->_secret['access_secret'])) {
-            $this->_secrets['shared_secret'] = $this->_secrets['access_secret'];
+            $this->_secrets['consumer_secret'] = $this->_secrets['access_secret'];
         }
 
-        if (empty($this->_secret['shared_secret'])) {
-            throw new OAuth2Exception('Missing requires shared_secret in OAuth2.signature');
+        if (empty($this->_secret['consumer_secret'])) {
+            throw new OAuth2Exception('Missing requires consumer_secret in OAuth2.signature');
         }
 
-        if (empty($this->_secret['user_key'])) {
-            throw new OAuth2Exception('Missing required user_key in OAuth2.signature');
+        if (empty($this->_secret['consumer_key'])) {
+            throw new OAuth2Exception('Missing required consumer_key in OAuth2.signature');
         }
 
-        if (!empty($this->_secret['oauth_token']) && empty($this->_secret['oauth_secret'])) {
+        if (!empty($this->_secret['oauth2_token']) && empty($this->_secret['oauth2_secret'])) {
             throw new OAuth2Exception('Missing oauth2_secret for supplied oauth2_token in OAuth2.signature');
         }
 
         return $this;
+    }
+
+    /**
+     * Sign In Request
+     */
+
+    public function sign($args = array()) {
+
+        if (!empty($args['path'])) {
+            this->setPath($args['path']);
+        }
+
+        if (!empty($args['action'])) {
+            this->setAction($action['action']);
+        }
+
+        if (!empty($args['method'])) {
+            this->setSignature($method['method']);
+        }
+
+        if (!empty($args['signature'])) {
+            $this->signature($args['signature']);
+        }
+
+        if (empty($args['parameter'])) {
+            $args['parameter']=array();
+        }
+
+        $this->setParameter($args['parameter']);
+        $nPrm = $this->_normalisedParameter();
+
     }
 
 
