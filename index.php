@@ -5,7 +5,7 @@
     /**
      * These are defined in config.inc
      * $apiKey
-     * $sharedSecret
+     * $consumerSecret
      * $accessToken
      * $tokenSecret
      */
