@@ -279,6 +279,48 @@
             $this->_param['oauth2_token'] = $this->_secret['oauth2_token'];
             return $this->_param['oauth2_token'];
         }
+        
+        private function _getTimeStamp() {
+
+            return $this->_param['oauth2_timestamp'] = time();
+        }
+
+        /**
+         * Normalised Parameters
+         * Read Parameters from file
+        */
+
+        private function _nrmParam() {
+
+            $nrm_keys = array();
+            $return_array = array();
+            
+            foreach ( $this->_param as $paramName=>$paramValue) {
+
+                if (preg_match('/w+_secret/', $paramName) OR
+                $paramName == "oauth2_signature") {
+                    continue;
+                }
+
+                if (strpos($paramValue, '@') !== 0 && !file_exists(substr($paramValue, 1))) {
+
+                    /**
+                     * 
+                     * Pending...
+                     * 
+                     */
+                }
+            }
+
+        }
+
+        private function _generateSignature ($parameters="") {
+            $secretKey .= '&';
+
+            if(isset($this->_secrets['oauth_secret'])) {
+                
+            }
+        }
 
     }
 
