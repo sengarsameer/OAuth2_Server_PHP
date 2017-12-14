@@ -1,10 +1,10 @@
 <?php
 
     class OAuth2 {
-        public $sbs;
+        public $sbs; //Signature_Base_String
         public $path;
         private $_path;
-        private $_parameter;
+        private $_param; //Parameters
         private $_signature;
         private $_secret;
         private $_character;
@@ -36,7 +36,7 @@
         */
 
         public function reset() {
-            $this->_parameter = array();
+            $this->_param = array();
             $this->path = NULL;
             $this->sbs = NULL;
             return $this;
@@ -52,8 +52,8 @@
 
         public function setParameter ($parameter = array()) {
 
-            if (empty($this->_parameter)) {
-                $this->_parameter = $parameter;
+            if (empty($this->_param)) {
+                $this->_param = $parameter;
             }
 
             if (is_string($parameter)) {
@@ -61,23 +61,31 @@
             }
 
             else if (!empty($parameter)) {
-                $this->_parameter = array_merge($this->_parameter,$parameter);
+                $this->_param = array_merge($this->_param,$parameter);
             }
 
-            if (empty($this->_parameter['oauth2_consumer_key'])) {
+            if (empty($this->_param['oauth2_consumer_key'])) {
                 $this->_getApiKey();
             }
 
-            if (empty($this->_parameter['oauth2_token'])) {
+            if (empty($this->_param['oauth2_token'])) {
                 $this->_getAccessToken();
             }
 
-            if (empty($this->_parameter['oauth2_character'])) {
+            if (empty($this->_param['oauth2_character'])) {
                 $this->_getCharacter();
             }
 
-            if (empty($this->_parameter['signature'])) {
+            if (empty($this->_param['signature'])) {
                 $this->setSignature();
+            }
+
+            if (empty($this->_param['oauth2_nonce'])) {
+                $this->_getNonce();
+            }
+
+            if (empty($this->_param['oauth2_timestamp'])) {
+                $this->_getTimeStamp();
             }
 
             return $this;
@@ -155,11 +163,36 @@
                 throw new OAuth2Exception('Missing oauth2_secret for supplied oauth2_token in OAuth2.signature');
             }
 
+            if (isset($this->_secret['oauth2_token_secret'])) {
+                $this->_secret['oauth2_secret'] = $this->_secret['oauth2_token_secret'];
+            }
+
             return $this;
         }
 
         public function setTokensAndSecret($signature) {
             return $this->signature($signature);
+        }
+
+        public function setSignature ($method = "") {
+
+            if (empty($method)) {
+                $method = $this->_signature;
+            }
+
+            $method = strtoupper($method);
+            switch($method) {
+                case 'PLAINTEXT':
+                case 'HMAC-SHA1':
+                    $this->_param['oauth2_signature'] = $method;
+                break;
+
+                default:
+                    throw new OAuth2Exception ("Wrong signing method $method specified for OAuth2.setSignature");
+                break;
+            }
+
+            return $this;
         }
 
         /**
@@ -192,8 +225,8 @@
             $nPrm = $this->_normalisedParameter();
 
             return array (
-            'parameter' => $this->_parameter,
-            'signature' => self::_oauth2Escape($this->_parameter['oauth2_signature']),
+            'parameter' => $this->_param,
+            'signature' => self::_oauth2Escape($this->_param['oauth2_signature']),
             'signed_url' => $this->_path . '?' . $nPrm,
             'sbs'=> $this->sbs
             );
@@ -228,8 +261,8 @@
                 throw new OAuth2Exception('No consumer_key set for OAuth2');
             }
 
-            $this->_parameter['oauth2_consumer_key'] = $this->_secret['consumer_key'];
-            return $this->_parameter['oauth2_consumer_key'];
+            $this->_param['oauth2_consumer_key'] = $this->_secret['consumer_key'];
+            return $this->_param['oauth2_consumer_key'];
 
         }
 
@@ -243,8 +276,8 @@
                 throw new OAuth2Exception('No access token (oauth2_token) set for OAuth2.');
             }
 
-            $this->_parameter['oauth2_token'] = $this->_secret['oauth2_token'];
-            return $this->_parameter['oauth2_token'];
+            $this->_param['oauth2_token'] = $this->_secret['oauth2_token'];
+            return $this->_param['oauth2_token'];
         }
 
     }
