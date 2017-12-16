@@ -13,7 +13,7 @@
 	     <input type="text" class="user" value="Enter Your Username" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Enter Your Username';}" />
 		 <input type="password" class="pass" value="Password" onfocus="this.value = '';" onblur="if (this.value == '') {this.value = 'Password';}" />
          <input type="submit" value="Login" />					
-		 <p><a href="auth.html">LogIn By OAuth</a></p>  
+		 <p><a href="http://localhost/OAuth_Server_PHP/Oauth_server/index1.php">LogIn By OAuth</a></p>  
      </form>
 	 </div>
 	 </div> 

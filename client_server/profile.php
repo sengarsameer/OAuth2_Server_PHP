@@ -10,7 +10,20 @@
      <div class="contact-form">
 	 <div class="signin">
      <form>
-	     <h3>fetch all basic information here</h3> 
+	     <h3>fetch all basic information here-</h3>
+
+         <?php
+        //  public function show($id)
+        //  {
+        //      $user = User::with('profile')->findOrFail($id);
+         
+        //      return view('dashboard.profiles.show', compact('user'));
+        //  }
+
+
+        // ?>
+
+        
      </form>
 	 </div>
 	 </div> 

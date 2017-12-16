@@ -159,11 +159,11 @@
             }
 
             if (isset($this->_secret['access_token'])) {
-                $this->_secret['oauth2_token'] = $this->_secrets['access_token'];
+                $this->_secret['oauth2_token'] = $this->_secret['access_token'];
             }
 
             if (isset($this->_secret['access_secret'])) {
-                $this->_secrets['consumer_secret'] = $this->_secrets['access_secret'];
+                $this->_secret['consumer_secret'] = $this->_secret['access_secret'];
             }
 
             if (empty($this->_secret['consumer_secret'])) {
