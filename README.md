@@ -4,7 +4,7 @@ Creating An API for implementing OAuth2
 index.php redirects you to login page of your website
 
 
-**api_server
+** api_server
 
 - index.php authenticates the user ( We call it AUTHENTICATION SERVER )
     If the user click on "Allow", the service redirects the user-agent to the application's redirect URI, and returns a URI                   fragment containing the access token.
@@ -15,7 +15,7 @@ index.php redirects you to login page of your website
     user data in JSON format.
 
 
-**client+oauth_server
+** client+oauth_server
 
 - index.php contains the login page of your website (We call it CLIENT SERVER)
     If user clicks on "Login By OAuth2" then it redirect to /api_server/index.php where it will be prompted by the service to allow or deny the application access to their account.
