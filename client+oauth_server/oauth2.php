@@ -1,5 +1,5 @@
 <?php
-
+ini_set("allow_url_fopen", 1);
     class OAuth2 {
         public $sbs; //Signature_Base_String
         public $path;
@@ -12,6 +12,7 @@
 
         /**
          * Constructing secret by using APIKey and ConsumerSecret
+         * This value of consumer_key and consumer_secret is usually provided by the site you wish to use.
         */
 
         function __construct ($apiKey = "", $consumerSecret="") {
@@ -137,6 +138,7 @@
 
         /**
          * set the signature for APIKey, ConsumerSecret, Oauth2_token, Oauth2_secret
+         * object of the token pairs {api_key:, consumer_secret:, oauth_token: oauth_secret:}
         */
       
         public function signature ($signature) {
@@ -270,30 +272,30 @@
         }
 
         private static function _oauth2Escape($string) {
-            if ($string == '0') {
-                return '0';
-            }
-            if ($string === 0) {
+            if ($string === 0) {                
                 return 0;
             }
-            if (strlen($string) == 0) {
-                return '';
+            if ($string == '0') { 
+                return '0'; 
+            }
+            if (strlen($string) == 0) { 
+                return ''; 
             }
             if (is_array($string)) {
                 try {
                     throw new OAuth2Exception('Array passed to _oauth2Escape');
                 }
-                catch (Exception $temp) {
-
-                }
+            catch (Exception $temp) {}
             }
-
             $string = urlencode($string);
-            $string = str_replace (
-            array('%7E','+'  ), // Replace these
-            array('~',  '%20'), // with these
-            $string
-            );
+    
+            //FIX: urlencode of ~ and '+'
+            $string = str_replace(
+                array('%7E','+'  ), // Replace these
+                array('~',  '%20'), // with these
+                $string);
+    
+            return $string;
         }
 
         private function _getCharacters($length = 5) {
@@ -380,14 +382,14 @@
 
         private function _generateSignature ($parameter="") {
 
-            $secretKey .= '&';
-            if(isset($this->_secret['oauth2_secret'])) {
-                $secretKey .= self::_oauth2Escape($this->_secret['oauth2_secret']);
-            }
-
             $secretKey = '';
             if(isset($this->_secret['consumer_secret'])) {
                 $secretKey = self::_oauth2Escape($this->_secret['consumer_secret']);
+            }
+
+            $secretKey .= '&';
+            if(isset($this->_secret['oauth2_secret'])) {
+                $secretKey .= self::_oauth2Escape($this->_secret['oauth2_secret']);
             }
 
             if(!empty($parameter)) {
@@ -426,6 +428,13 @@
                     continue;
                 }
 
+                /**
+                 * Read parameters from a file.
+                 * In php.ini file set
+                 * Uncommenting : extension=php_openssl.dll
+                 * Switch on : allow_url_include = On
+                */
+              
                 if (strpos($paramValue, '@') !== 0 && !file_exists(substr($paramValue, 1))) {
                     if (is_array($paramValue)) {
                         $nrml_keys[self::_oauth2Escape($paramName)] = array();
@@ -444,7 +453,7 @@
             ksort($nrml_keys);
 
             foreach($nrml_keys as $key=>$val) {
-
+              
                 if (is_array($val)) {
                     sort($val);
 

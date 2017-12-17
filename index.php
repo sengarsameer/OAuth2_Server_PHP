@@ -1,14 +1,6 @@
 <?php
-
-    include ('./oauth2.php');
-    include ('./config.inc.php');
-    /**
-     * These are defined in config.inc
-     * $apiKey
-     * $consumerSecret
-     * $accessToken
-     * $tokenSecret
-     */
-
-     $path="";
-?>
+    	sleep(2);
+	header('Location: http://localhost/OAuth_Server_PHP/client+oauth_server/');
+	die();
+    
+?> 
