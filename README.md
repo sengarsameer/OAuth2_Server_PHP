@@ -31,5 +31,9 @@
     It defines:
     > $apiKey (consumer_key)
     > $consumerSecret (consumer_secret)
+    
+## Currently Working on
+
+**Nonce and Timestamp implemenation in API Server**
 
 
