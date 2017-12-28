@@ -1,11 +1,12 @@
 <?php
+
 ini_set("allow_url_fopen", 1);
+
     class OAuth2 {
-        public $sbs; //Signature_Base_String
+    
         public $path;
         private $_path;
         private $_param; //Parameters
-        private $_signature;
         private $_secret;
         private $_characters;
         private $_action;
@@ -25,7 +26,6 @@ ini_set("allow_url_fopen", 1);
                 $this->_secret['consumer_secret'] = $consumerSecret;
             }
 
-            $this->_signature = "HMAC-SHA1";
             $this->_action = "GET";
             $this->_characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return $this;
@@ -39,12 +39,12 @@ ini_set("allow_url_fopen", 1);
         public function reset() {
             $this->_param = array();
             $this->path = NULL;
-            $this->sbs = NULL;
             return $this;
         }
 
         /**
          * Set Parameters
+         * 
         */
 
         public function setQueryString ($parameter) {
@@ -77,9 +77,6 @@ ini_set("allow_url_fopen", 1);
                 $this->_getCharacters();
             }
 
-            if (empty($this->_param['signature'])) {
-                $this->setSignature();
-            }
 
             if (empty($this->_param['oauth2_timestamp'])) {
                 $this->_getTimeStamp();
@@ -136,101 +133,6 @@ ini_set("allow_url_fopen", 1);
             return $this;
         }
 
-        /**
-         * set the signature for APIKey, ConsumerSecret, Oauth2_token, Oauth2_secret
-         * object of the token pairs {api_key:, consumer_secret:, oauth_token: oauth_secret:}
-        */
-      
-        public function signature ($signature) {
-
-            if (!empty($signature)) {
-                if (empty($this->_secret)) {
-                    $this->_secret=array();
-                }
-                $this->_secret=array_merge($this->_secret,$signature);
-            }
-
-            if (!empty($signature) && !is_array($signature)) {
-                try {
-                    throw new OAuth2Exception('Must pass the dictionary array to OAuth2.signature');
-                }
-                catch (Exception $temp) {
-
-                }
-                
-            }
-
-            if (isset($this->_secret['access_token'])) {
-                $this->_secret['oauth2_token'] = $this->_secret['access_token'];
-            }
-
-            if (isset($this->_secret['access_secret'])) {
-                $this->_secret['consumer_secret'] = $this->_secret['access_secret'];
-            }
-
-            if (empty($this->_secret['consumer_secret'])) {
-                try {
-                    throw new OAuth2Exception('Missing requires consumer_secret in OAuth2.signature');
-                }
-                catch (Exception $temp) {
-
-                }
-            }
-
-            if (empty($this->_secret['consumer_key'])) {
-                try {
-                    throw new OAuth2Exception('Missing required consumer_key in OAuth2.signature');
-                }
-                catch (Exception $temp) {
-
-                }                
-            }
-
-            if (!empty($this->_secret['oauth2_token']) && empty($this->_secret['oauth2_secret'])) {
-                try {
-                    throw new OAuth2Exception('Missing oauth2_secret for supplied oauth2_token in OAuth2.signature');
-                }
-                catch (Exception $temp) {
-
-                }                
-            }
-
-            if (isset($this->_secret['oauth2_token_secret'])) {
-                $this->_secret['oauth2_secret'] = $this->_secret['oauth2_token_secret'];
-            }
-
-            return $this;
-        }
-
-        public function setTokensAndSecret($signature) {
-            return $this->signature($signature);
-        }
-
-        public function setSignature ($method = "") {
-
-            if (empty($method)) {
-                $method = $this->_signature;
-            }
-
-            $method = strtoupper($method);
-            switch($method) {
-                case 'PLAINTEXT':
-                case 'HMAC-SHA1':
-                    $this->_param['oauth2_signature'] = $method;
-                break;
-
-                default:
-                try {
-                    throw new OAuth2Exception ("Wrong signing method $method specified for OAuth2.setSignature");
-                }
-                catch (Exception $temp) {
-
-                }
-                break;
-            }
-
-            return $this;
-        }
 
         /**
         * Sign In Request
@@ -246,13 +148,6 @@ ini_set("allow_url_fopen", 1);
                 $this->setAction($args['action']);
             }
 
-            if (!empty($args['method'])) {
-                $this->setSignature($args['method']);
-            }
-
-            if (!empty($args['signature'])) {
-                $this->signature($args['signature']);
-            }
 
             if (empty($args['parameter'])) {
                 $args['parameter']=array();
@@ -263,9 +158,7 @@ ini_set("allow_url_fopen", 1);
 
             return array (
             'parameter' => $this->_param,
-            'signature' => self::_oauth2Escape($this->_param['oauth2_signature']),
             'signed_url' => $this->_path . '?' . $nPrm,
-            'sbs'=> $this->sbs,
             'header' => $this->getHeaderString()
             );
 
@@ -291,7 +184,7 @@ ini_set("allow_url_fopen", 1);
     
             //FIX: urlencode of ~ and '+'
             $string = str_replace(
-                array('%7E','+'  ), // Replace these
+                array('%7E','+'  ), // Replace these 
                 array('~',  '%20'), // with these
                 $string);
     
@@ -380,41 +273,6 @@ ini_set("allow_url_fopen", 1);
             return $this->_param['oauth2_timestamp'] = time();
         }
 
-        private function _generateSignature ($parameter="") {
-
-            $secretKey = '';
-            if(isset($this->_secret['consumer_secret'])) {
-                $secretKey = self::_oauth2Escape($this->_secret['consumer_secret']);
-            }
-
-            $secretKey .= '&';
-            if(isset($this->_secret['oauth2_secret'])) {
-                $secretKey .= self::_oauth2Escape($this->_secret['oauth2_secret']);
-            }
-
-            if(!empty($parameter)) {
-                $parameter = urlencode($parameter);
-            }
-
-            switch($this->_param['oauth2_signature']) {
-
-                case 'PLAINTEXT':
-                return urlencode($secretKey);
-
-                case 'HMAC-SHA1':
-                    $this->sbs = self::_oauth2Escape($this->_action) . '&' . self::_oauth2Escape($this->_path) . '&' . $parameter;
-                return base64_encode(hash_hmac('sha1', $this->sbs, $secretKey, TRUE));
-
-                default:
-                try {
-                    throw new OAuth2Exception('Unknown signature method for OAuth2');
-                }
-                catch (Exception $temp) {
-
-                }
-                break;
-            }
-        }
 
         private function _normalizedParameter() {
 
@@ -423,8 +281,7 @@ ini_set("allow_url_fopen", 1);
             
             foreach ( $this->_param as $paramName=>$paramValue) {
 
-                if (preg_match('/w+_secret/', $paramName) OR
-                $paramName == "oauth2_signature") {
+                if (preg_match('/w+_secret/', $paramName)) {
                     continue;
                 }
 
@@ -450,7 +307,7 @@ ini_set("allow_url_fopen", 1);
                 }
             }
 
-            ksort($nrml_keys);
+            ksort($nrml_keys); // To sort an associative array in ascending order, according to the key
 
             foreach($nrml_keys as $key=>$val) {
               
@@ -469,17 +326,12 @@ ini_set("allow_url_fopen", 1);
             }
 
             $presign = join("&", $return_array);
-            $sign = urlencode($this->_generateSignature($presign));
-            $this->_param['oauth2_signature'] = $sign;
-            array_push($return_array, "oauth2_signature=$sign");
 
             return join("&", $return_array);
         }
 
         public function getHeaderString($args = array()) {
-            if (empty($this->_param['oauth2_signature'])) {
-                $this->sign($args);
-            }
+        
             $result = 'OAuth2 ';
 
             foreach ($this->_param as $pName => $pValue) {
