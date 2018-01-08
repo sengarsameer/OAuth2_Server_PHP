@@ -4,6 +4,15 @@
 - index.php redirects you to login page of your website
 
 
+## How to implement
+- Clone/Download the repo in your PC.
+- Unzip the folder in htdocs (if using xampp) or www/html/ (i.e. root folder of the web server).
+- Start the server in your PC.
+- Open your web-browser and go to [http://localhost/OAuth2_Server_PHP/](http://localhost/OAuth2_Server_PHP/)
+- Click on button "LogIn By OAuth2". Cheers :) your OAuth2 server is running.
+- For more details about functionality please read the following description.
+
+
 ## api_server
 
 **index.php authenticates the user ( We call it AUTHENTICATION SERVER )**
